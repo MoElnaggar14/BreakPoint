@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        FirebaseApp.configure()
+        
+        if Auth.auth().currentUser == nil {
+           let storyBoard = UIStoryboard.init(name: "Main", bundle: Bundle.main)
+           let AuthVC = storyBoard.instantiateViewController(withIdentifier: "AuthVC")
+           window?.makeKeyAndVisible()
+           window?.rootViewController?.present(AuthVC, animated: true, completion: nil)
+        }
         return true
     }
 

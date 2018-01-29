@@ -7,29 +7,50 @@
 //
 
 import UIKit
-
+import Firebase
 class PostVC: UIViewController {
 
+    @IBOutlet weak var profileImage: UIImageView!
+    @IBOutlet weak var emailLbl: UILabel!
+    @IBOutlet weak var textview: UITextView!
+    @IBOutlet weak var sendBtn: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        textview.delegate = self
+        sendBtn.bindToKeyboard()
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        emailLbl.text = Auth.auth().currentUser?.email 
     }
-    */
 
+    @IBAction func SendPostBtnWasPressed(_ sender: Any) {
+        if textview.text != nil && textview.text != "Say something here..." {
+            sendBtn.isEnabled = false
+            DataService.instance.uploadPost(WithMessage: textview.text, forUID: (Auth.auth().currentUser?.uid)! , withGroupKey: nil, sendComplete: { (success) in
+                if success {
+                    dismiss(animated: true, completion: nil)
+                    sendBtn.isEnabled = true
+                } else {
+                    sendBtn.isEnabled = false
+                    print("there was error...")
+                }
+            })
+        }
+    }
+    
+    @IBAction func closeBtnWasPressed(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
 }
+
+extension PostVC: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        textView.text = ""
+    }
+}
+
+

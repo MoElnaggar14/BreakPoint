@@ -10,26 +10,44 @@ import UIKit
 
 class LoginVC: UIViewController {
 
+    @IBOutlet weak var emailTF: InsertTextFiled!
+    @IBOutlet weak var passwordTF: InsertTextFiled!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        emailTF.delegate = self
+        passwordTF.delegate = self
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    @IBAction func signInBtnWasPressed(_ sender: Any) {
+        if emailTF.text != nil && passwordTF.text != nil {
+            AuthService.instance.loginUser(withEmail: emailTF.text!, andPassword: passwordTF.text!, loginComplete: { (success, loginError) in
+                if success {
+                    self.dismiss(animated: true, completion: nil)
+                } else {
+                    print(String(describing: loginError?.localizedDescription))
+                }
+                AuthService.instance.registerUser(withEmail: self.emailTF.text!, andPassword:self.passwordTF.text!, userCreationComplete: { (success, registerError) in
+                    if success {
+                        AuthService.instance.loginUser(withEmail: self.emailTF.text!, andPassword: self.passwordTF.text!, loginComplete: { (success, nil) in
+                            let alert = UIAlertController(title: "Congrats!", message: "Successfully, registered user", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                             self.dismiss(animated: true, completion: nil)
+                            }))
+                            self.present(alert, animated: true, completion: nil)
+                        })
+                    } else {
+                        print(String(describing: registerError?.localizedDescription))
+                    }
+                })
+            })
+        }
+    }
+  
+    @IBAction func closeBtnWasPressed(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
+
+extension LoginVC: UITextFieldDelegate { }
